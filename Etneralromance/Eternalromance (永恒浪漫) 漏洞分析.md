@@ -695,7 +695,7 @@ WARNING: Frame IP not in any known module. Following frames may be wrong.
 
 ## 6 关于补丁
 了解了漏洞原理之后修补都很简单了。只要在`srv!SrvFindTransaction`里面判断一下SMB COMMAND的类型是否一致就好了。
-修补前
+修补后
 ```cpp
 TRANSCATION *__fastcall SrvFindTransaction(int pConnect, SMB_HEADER *Fid, __int16 a3)
 {
