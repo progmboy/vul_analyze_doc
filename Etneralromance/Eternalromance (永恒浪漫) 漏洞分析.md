@@ -64,7 +64,7 @@ The PID, MID, TID, and UID MUST be the same for all requests and responses that 
 ### 3.4 SMB_COM_WRITE_ANDX (0x2F) 
 
 结构如图：
-![ANDX_STRUCTURE](./andx.JPG)
+![ANDX_STRUCTURE](.//andx.JPG)
 
 更详细看 (https://msdn.microsoft.com/en-us/library/ee441848.aspx)
 
@@ -183,8 +183,8 @@ int __stdcall SrvFindTransaction(int a1, int pSmbHeaderOrMid, int a3)
   pSmbHeader_ = (SMB_HEADER *)pSmbHeaderOrMid;
   
   //
-  // command 0x2f is SUM_CMD_WRITE_ANDX
-  // a3 = SUM_CMD_WRITE_ANDX->Fid
+  // command 0x2f is SMB_CMD_WRITE_ANDX
+  // a3 = SMB_CMD_WRITE_ANDX->Fid
   //
   
   if ( *(_BYTE *)(pSmbHeaderOrMid + 4) == 0x2F )
@@ -208,7 +208,7 @@ int __stdcall SrvFindTransaction(int a1, int pSmbHeaderOrMid, int a3)
     
     //
     // 这里是对比TID，PID，UID,MID
-    // 这里注意这个MID,如果命令是SUM_CMD_WRITE_ANDX MID就是SUM_CMD_WRITE_ANDX MID数据包中的Fid
+    // 这里注意这个MID,如果命令是SMB_CMD_WRITE_ANDX MID就是SMB_CMD_WRITE_ANDX MID数据包中的Fid
     //
     
     v7 = (TRANSCATION *)(i - 6);
@@ -237,7 +237,7 @@ int __stdcall SrvFindTransaction(int a1, int pSmbHeaderOrMid, int a3)
 
 大家可以看下逻辑。重点在这里如果命令是SMB_CMD_WRITE_ANDX(0x2f)话那么MID的对比就不一样了，这里是用Transaction->MID和SMB_CMD_WRITE_ANDX->Fid比较。如果一样返回pTransaction。那么问题来了。如果服务器端正好有一个其他的Transaction->MID恰好和SMB_CMD_WRITE_ANDX->Fid的相等那么将会返回一个错误的pTransaction。很经典的类型混淆。
 
-处理SUM_CMD_WRITE_ANDX的函数SrvSmbWriteAndX代码如下:
+处理SMB_CMD_WRITE_ANDX的函数SrvSmbWriteAndX代码如下:
 ```cpp
 signed int __thiscall SrvSmbWriteAndX(int this)
 {
@@ -695,7 +695,7 @@ WARNING: Frame IP not in any known module. Following frames may be wrong.
 
 ## 6 关于补丁
 了解了漏洞原理之后修补都很简单了。只要在`srv!SrvFindTransaction`里面判断一下SMB COMMAND的类型是否一致就好了。
-修补前
+修补后
 ```cpp
 TRANSCATION *__fastcall SrvFindTransaction(int pConnect, SMB_HEADER *Fid, __int16 a3)
 {
